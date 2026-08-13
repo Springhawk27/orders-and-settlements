@@ -101,6 +101,13 @@ export type Payment = {
   createdAt: string;
 };
 
+/** Recording or voiding a payment returns the updated order too, so the client
+ * does not have to refetch to show the new balance. */
+export type PaymentResult = {
+  payment: Payment;
+  order: OrderSummary;
+};
+
 export type AuditEvent = {
   id: string;
   action: AuditAction;
