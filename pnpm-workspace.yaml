@@ -1,0 +1,17 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Single source of truth for versions shared across packages, so the API, the web
+# app and the shared package can never drift onto different majors.
+catalog:
+  eslint: ^9.39.5
+  '@eslint/js': ^9.39.5
+  typescript: ^6.0.3
+  zod: ^4.4.3
+  vitest: ^4.1.10
+
+allowBuilds:
+  esbuild: true
+  mongodb-memory-server: true
+  unrs-resolver: true
