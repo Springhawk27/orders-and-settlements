@@ -1,7 +1,17 @@
 import app from './app';
+import config from './config';
+import { connectDatabase } from './config/database';
+import logger from './shared/logger';
 
-const port = Number(process.env.PORT ?? 5000);
+const bootstrap = async (): Promise<void> => {
+  await connectDatabase();
 
-app.listen(port, () => {
-  process.stdout.write(`api listening on http://localhost:${port}\n`);
+  app.listen(config.port, () => {
+    logger.info(`api listening on http://localhost:${config.port}`);
+  });
+};
+
+bootstrap().catch((error: unknown) => {
+  logger.fatal({ err: error }, 'failed to start the api');
+  process.exit(1);
 });
