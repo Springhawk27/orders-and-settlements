@@ -1,4 +1,5 @@
 import {
+  dateRangeQuerySchema,
   orderListQuerySchema,
   type CreateOrderInput,
   type UpdateOrderInput,
@@ -24,6 +25,17 @@ const list: RequestHandler = async (req, res) => {
   const { orders, meta } = await orderService.list(getUserId(req), query);
 
   sendResponse(res, { statusCode: StatusCodes.OK, meta, data: orders });
+};
+
+const exportCsv: RequestHandler = async (req, res) => {
+  const range = dateRangeQuerySchema.parse(req.query);
+  const csv = await orderService.exportCsv(getUserId(req), range);
+
+  const stamp = new Date().toISOString().slice(0, 10);
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="orders-${stamp}.csv"`);
+  res.status(StatusCodes.OK).send(csv);
 };
 
 const getById: RequestHandler = async (req, res) => {
@@ -60,6 +72,7 @@ const listAuditTrail: RequestHandler = async (req, res) => {
 export const orderController = {
   create,
   list,
+  exportCsv,
   getById,
   update,
   remove,

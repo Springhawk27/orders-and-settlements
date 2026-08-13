@@ -11,6 +11,10 @@ router.use(requireAuth);
 
 router.post('/', validateRequest(createOrderSchema), orderController.create);
 router.get('/', orderController.list);
+
+// Registered before /:id, which would otherwise treat "export" as an order id.
+router.get('/export', orderController.exportCsv);
+
 router.get('/:id', orderController.getById);
 router.patch('/:id', validateRequest(updateOrderSchema), orderController.update);
 router.delete('/:id', orderController.remove);

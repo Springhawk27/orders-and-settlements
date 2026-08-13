@@ -12,6 +12,8 @@ catalog:
   vitest: ^4.1.10
 
 allowBuilds:
+  # Analytics that reports on install. Nothing here needs it.
+  '@scarf/scarf': false
   esbuild: true
   mongodb-memory-server: true
   unrs-resolver: true

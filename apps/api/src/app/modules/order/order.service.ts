@@ -2,19 +2,21 @@ import {
   lineTotalMinor,
   sumMinor,
   type CreateOrderInput,
+  type DateRangeQuery,
   type LineItemInput,
   type Order as OrderDto,
   type OrderListQuery,
   type OrderSummary,
+  type PaginationMeta,
   type UpdateOrderInput,
 } from '@crossval/shared';
 import { StatusCodes } from 'http-status-codes';
-import { Types } from 'mongoose';
+import { Types, type QueryFilter } from 'mongoose';
 import ApiError from '../../../errors/ApiError';
 import { buildPaginationMeta } from '../../../helpers/pagination';
-import type { PaginationMeta } from '@crossval/shared';
+import { toCsv } from '../../../shared/csv';
 import { auditService } from '../audit/audit.service';
-import type { LineItemAttrs } from './order.interface';
+import type { LineItemAttrs, OrderAttrs } from './order.interface';
 import { Order } from './order.model';
 import { orderRepository, type OrderDocument } from './order.repository';
 import {
@@ -226,6 +228,50 @@ const update = async (
   return toDetail(updated);
 };
 
+const exportCsv = async (userId: string, range: DateRangeQuery): Promise<string> => {
+  const now = new Date();
+  const filter: QueryFilter<OrderAttrs> = { userId: toObjectId(userId) };
+
+  if (range.from || range.to) {
+    filter.issueDate = {
+      ...(range.from && { $gte: range.from }),
+      ...(range.to && { $lte: range.to }),
+    };
+  }
+
+  const orders = await Order.find(filter).sort({ issueDate: -1 }).lean<OrderDocument[]>();
+
+  const headers = [
+    'Order number',
+    'Customer',
+    'Issue date',
+    'Due date',
+    'Status',
+    'Currency',
+    'Total',
+    'Paid',
+    'Due',
+    'Days overdue',
+  ];
+
+  // Amounts go out as plain decimals rather than formatted currency, so a
+  // spreadsheet reads them as numbers instead of text.
+  const rows = orders.map((order) => [
+    order.orderNumber,
+    order.customer.name,
+    order.issueDate.toISOString().slice(0, 10),
+    order.dueDate.toISOString().slice(0, 10),
+    deriveDisplayStatus(order.paymentStatus, order.dueDate, now),
+    order.currency,
+    (order.totalMinor / 100).toFixed(2),
+    (order.amountPaidMinor / 100).toFixed(2),
+    (amountDueMinor(order.totalMinor, order.amountPaidMinor) / 100).toFixed(2),
+    isOverdue(order.paymentStatus, order.dueDate, now) ? daysOverdue(order.dueDate, now) : 0,
+  ]);
+
+  return toCsv(headers, rows);
+};
+
 const remove = async (userId: string, orderId: string): Promise<void> => {
   const existing = await requireOwnedOrder(orderId, userId);
 
@@ -256,6 +302,7 @@ export const orderService = {
   getById,
   update,
   remove,
+  exportCsv,
   toSummary,
   toDetail,
   requireOwnedOrder,

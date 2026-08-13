@@ -7,12 +7,14 @@ import helmet from 'helmet';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { pinoHttp } from 'pino-http';
+import swaggerUi from 'swagger-ui-express';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import { apiRateLimiter } from './app/middlewares/rateLimiter';
 import routes from './app/routes';
 import config from './config';
 import { connectDatabase } from './config/database';
+import { openApiDocument } from './docs/openapi';
 import logger from './shared/logger';
 
 const app = express();
@@ -50,6 +52,16 @@ app.use(async (_req, _res, next) => {
   await connectDatabase();
   next();
 });
+
+app.get('/api/docs.json', (_req, res) => {
+  res.json(openApiDocument);
+});
+
+app.use(
+  '/api/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(openApiDocument, { customSiteTitle: 'Orders and Settlements API' }),
+);
 
 app.use(apiRateLimiter);
 app.use(`/api/${API_VERSION}`, routes);
