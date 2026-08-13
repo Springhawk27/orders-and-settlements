@@ -39,6 +39,30 @@ export type PostOptions = RequestOptions & {
 const isErrorEnvelope = (payload: unknown): payload is ApiErrorResponse =>
   typeof payload === 'object' && payload !== null && 'success' in payload && !payload.success;
 
+let inFlightRefresh: Promise<boolean> | null = null;
+
+/**
+ * Rotates the session, and deliberately shares one attempt between every caller.
+ *
+ * Refresh tokens are single use: presenting one that has already been rotated
+ * is treated by the API as a stolen token and revokes every session for the
+ * user. Two requests expiring at the same moment would do exactly that, so
+ * concurrent callers wait on the same promise instead of each rotating.
+ */
+const refreshSession = (): Promise<boolean> => {
+  inFlightRefresh ??= fetch(`${BASE_PATH}/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+    .then((response) => response.ok)
+    .catch(() => false)
+    .finally(() => {
+      inFlightRefresh = null;
+    });
+
+  return inFlightRefresh;
+};
+
 type RequestConfig = {
   method: string;
   body?: unknown;
@@ -46,10 +70,10 @@ type RequestConfig = {
   signal?: AbortSignal;
 };
 
-const request = async <T>(path: string, config: RequestConfig): Promise<ApiClientResult<T>> => {
+const send = async (path: string, config: RequestConfig): Promise<Response> => {
   const hasBody = config.body !== undefined;
 
-  const response = await fetch(`${BASE_PATH}${path}`, {
+  return fetch(`${BASE_PATH}${path}`, {
     method: config.method,
     credentials: 'include',
     signal: config.signal,
@@ -59,6 +83,23 @@ const request = async <T>(path: string, config: RequestConfig): Promise<ApiClien
     },
     body: hasBody ? JSON.stringify(config.body) : undefined,
   });
+};
+
+const request = async <T>(
+  path: string,
+  config: RequestConfig,
+  allowRefresh = true,
+): Promise<ApiClientResult<T>> => {
+  const response = await send(path, config);
+
+  // The access token lasts minutes while the session lasts days, so a 401 is
+  // usually just an expired token. Retry once behind a refresh; a second 401
+  // means the session is genuinely over.
+  if (response.status === 401 && allowRefresh && !path.startsWith('/auth/')) {
+    if (await refreshSession()) {
+      return request<T>(path, config, false);
+    }
+  }
 
   // A gateway or a crash can answer with something that is not the envelope,
   // so parsing is allowed to fail without masking the status code.
@@ -72,6 +113,10 @@ const request = async <T>(path: string, config: RequestConfig): Promise<ApiClien
       envelope?.message ?? FALLBACK_MESSAGE,
       envelope?.errorMessages ?? [],
     );
+  }
+
+  if (payload === null) {
+    throw new ApiClientError(response.status, FALLBACK_MESSAGE);
   }
 
   const envelope = payload as ApiResponse<T>;
