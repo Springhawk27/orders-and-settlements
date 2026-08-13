@@ -62,13 +62,5 @@ pnpm dev
 | `pnpm typecheck` | Type-check every package              |
 | `pnpm format`    | Format the repository                 |
 
-## Notes on tooling
-
 Shared dependency versions are declared once in `pnpm-workspace.yaml` under `catalog:` so the
 three packages cannot end up on different majors.
-
-Two versions are deliberately not the newest published:
-
-- **TypeScript 6.0.3**, not 7.0.2 — TypeScript 7 ships no compiler API until 7.1, and
-  `typescript-eslint` cannot run against it.
-- **ESLint 9**, not 10 — `eslint-config-next` still depends on plugins that peer-cap at ESLint 9.

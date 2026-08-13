@@ -20,6 +20,7 @@ export default tseslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }],
       'no-console': 'error',
       eqeqeq: ['error', 'smart'],
       'object-shorthand': 'error',
