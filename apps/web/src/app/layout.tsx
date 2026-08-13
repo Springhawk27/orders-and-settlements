@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Toaster } from '@/components/ui/sonner';
+import { QueryProvider } from '@/providers/query-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import './globals.css';
 
 const inter = Inter({
@@ -12,10 +15,19 @@ export const metadata: Metadata = {
   description: 'Track orders, record payments and see what is outstanding.',
 };
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
-  return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
-    </html>
-  );
-}
+// next-themes writes the class on <html> before paint, which the server render
+// cannot know about.
+const RootLayout = ({ children }: LayoutProps<'/'>) => (
+  <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
+    <body className="flex min-h-full flex-col">
+      <ThemeProvider>
+        <QueryProvider>
+          {children}
+          <Toaster />
+        </QueryProvider>
+      </ThemeProvider>
+    </body>
+  </html>
+);
+
+export default RootLayout;
