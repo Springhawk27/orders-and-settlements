@@ -10,7 +10,7 @@ over-paid, even when several payments arrive at the same instant.
 
 **API docs:** https://orders-and-settlements-api-beta.vercel.app/api/docs
 
-**Demo account**, already loaded with 26 orders across every status and ageing bucket:
+**Demo account**, already loaded with orders across every status and ageing bucket:
 
 ```
 demo@settlements.app
