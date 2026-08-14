@@ -181,5 +181,29 @@ describe('GET /orders/export', () => {
       .set('Cookie', owner.cookies);
 
     expect(outside.text.trim().split('\r\n')).toHaveLength(1);
+
+    const inside = await request(app)
+      .get(`${ORDERS}/export?from=2019-01-01&to=2099-12-31`)
+      .set('Cookie', owner.cookies);
+
+    expect(inside.text.trim().split('\r\n')).toHaveLength(2);
+  });
+
+  it('names the file after the range so a folder of exports stays readable', async () => {
+    await createOrder(owner);
+
+    const ranged = await request(app)
+      .get(`${ORDERS}/export?from=2026-01-01&to=2026-12-31`)
+      .set('Cookie', owner.cookies);
+
+    expect(ranged.headers['content-disposition']).toContain('orders-2026-01-01_to_2026-12-31.csv');
+  });
+
+  it('rejects a malformed date in the range', async () => {
+    const response = await request(app)
+      .get(`${ORDERS}/export?from=not-a-date`)
+      .set('Cookie', owner.cookies);
+
+    expect(response.status).toBe(400);
   });
 });

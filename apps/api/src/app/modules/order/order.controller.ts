@@ -31,10 +31,13 @@ const exportCsv: RequestHandler = async (req, res) => {
   const range = dateRangeQuerySchema.parse(req.query);
   const csv = await orderService.exportCsv(getUserId(req), range);
 
-  const stamp = new Date().toISOString().slice(0, 10);
+  // Naming the range in the file means a folder of exports stays readable.
+  const asDate = (value: Date | undefined) => value?.toISOString().slice(0, 10);
+  const label = [asDate(range.from), asDate(range.to)].filter(Boolean).join('_to_');
+  const suffix = label || new Date().toISOString().slice(0, 10);
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="orders-${stamp}.csv"`);
+  res.setHeader('Content-Disposition', `attachment; filename="orders-${suffix}.csv"`);
   res.status(StatusCodes.OK).send(csv);
 };
 
