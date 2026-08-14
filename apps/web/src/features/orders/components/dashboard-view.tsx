@@ -2,6 +2,7 @@
 
 import { AlertTriangle, ArrowRight, Banknote, Wallet } from 'lucide-react';
 import Link from 'next/link';
+import { FadeIn } from '@/components/shared/fade-in';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { CardSkeleton } from '@/components/shared/loading-skeletons';
@@ -56,31 +57,37 @@ export const DashboardView = () => {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <KpiCard
-          label="Outstanding"
-          minorUnits={data.totalOutstandingMinor}
-          currency={data.currency}
-          icon={Wallet}
-          hint={`Across ${data.orderCount} ${data.orderCount === 1 ? 'order' : 'orders'}`}
-        />
-        <KpiCard
-          label="Overdue"
-          minorUnits={data.totalOverdueMinor}
-          currency={data.currency}
-          icon={AlertTriangle}
-          tone="warning"
-          hint={
-            data.countsByStatus.overdue > 0
-              ? `${data.countsByStatus.overdue} past their due date`
-              : 'Nothing past its due date'
-          }
-        />
-        <KpiCard
-          label="Collected this month"
-          minorUnits={data.collectedThisMonthMinor}
-          currency={data.currency}
-          icon={Banknote}
-        />
+        <FadeIn>
+          <KpiCard
+            label="Outstanding"
+            minorUnits={data.totalOutstandingMinor}
+            currency={data.currency}
+            icon={Wallet}
+            hint={`Across ${data.orderCount} ${data.orderCount === 1 ? 'order' : 'orders'}`}
+          />
+        </FadeIn>
+        <FadeIn delay={0.06}>
+          <KpiCard
+            label="Overdue"
+            minorUnits={data.totalOverdueMinor}
+            currency={data.currency}
+            icon={AlertTriangle}
+            tone="warning"
+            hint={
+              data.countsByStatus.overdue > 0
+                ? `${data.countsByStatus.overdue} past their due date`
+                : 'Nothing past its due date'
+            }
+          />
+        </FadeIn>
+        <FadeIn delay={0.12}>
+          <KpiCard
+            label="Collected this month"
+            minorUnits={data.collectedThisMonthMinor}
+            currency={data.currency}
+            icon={Banknote}
+          />
+        </FadeIn>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

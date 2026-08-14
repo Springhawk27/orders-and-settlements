@@ -34,14 +34,16 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
   <div className="overflow-x-auto rounded-lg border">
     <Table>
       <TableHeader>
+        {/* Total and Paid drop away on narrow screens; the balance still owed
+            and how late it is are what the page is actually for. */}
         <TableRow className="hover:bg-transparent">
           <TableHead>Order</TableHead>
           <TableHead>Customer</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="text-right">Total</TableHead>
-          <TableHead className="text-right">Paid</TableHead>
+          <TableHead className="hidden text-right lg:table-cell">Total</TableHead>
+          <TableHead className="hidden text-right lg:table-cell">Paid</TableHead>
           <TableHead className="text-right">Due</TableHead>
-          <TableHead>Due date</TableHead>
+          <TableHead className="hidden sm:table-cell">Due date</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -66,10 +68,10 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
             <TableCell>
               <StatusBadge status={order.displayStatus} />
             </TableCell>
-            <TableCell>
+            <TableCell className="hidden lg:table-cell">
               <Money minorUnits={order.totalMinor} currency={order.currency} />
             </TableCell>
-            <TableCell>
+            <TableCell className="hidden lg:table-cell">
               <Money
                 minorUnits={order.amountPaidMinor}
                 currency={order.currency}
@@ -86,7 +88,7 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
                 )}
               />
             </TableCell>
-            <TableCell>
+            <TableCell className="hidden sm:table-cell">
               <DueDate order={order} />
             </TableCell>
           </TableRow>

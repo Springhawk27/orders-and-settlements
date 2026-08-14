@@ -1,6 +1,6 @@
 import type { Currency } from '@crossval/shared';
-import { formatMinor } from '@crossval/shared';
 import type { LucideIcon } from 'lucide-react';
+import { AnimatedMoney } from '@/components/shared/animated-money';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -34,14 +34,14 @@ export const KpiCard = ({
         />
       </div>
 
-      <p
+      <AnimatedMoney
+        minorUnits={minorUnits}
+        currency={currency}
         className={cn(
-          'text-2xl font-semibold tabular-nums tracking-tight',
+          'block text-2xl font-semibold tracking-tight',
           tone === 'warning' && minorUnits > 0 && 'text-rose-600 dark:text-rose-400',
         )}
-      >
-        {formatMinor(minorUnits, currency)}
-      </p>
+      />
 
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
     </CardContent>

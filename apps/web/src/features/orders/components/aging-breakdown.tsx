@@ -1,9 +1,12 @@
+'use client';
+
 import type {
   AgingBreakdown as AgingBreakdownEntry,
   AgingBucket,
   Currency,
 } from '@crossval/shared';
 import { formatMinor } from '@crossval/shared';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 const BUCKET_LABELS: Record<AgingBucket, string> = {
@@ -29,6 +32,7 @@ type AgingBreakdownProps = {
 };
 
 export const AgingBreakdown = ({ aging, currency }: AgingBreakdownProps) => {
+  const prefersReducedMotion = useReducedMotion();
   const largest = Math.max(...aging.map((entry) => entry.amountMinor), 1);
   const hasAny = aging.some((entry) => entry.orderCount > 0);
 
@@ -42,7 +46,7 @@ export const AgingBreakdown = ({ aging, currency }: AgingBreakdownProps) => {
 
   return (
     <ul className="space-y-3">
-      {aging.map((entry) => (
+      {aging.map((entry, index) => (
         <li key={entry.bucket} className="space-y-1.5">
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span className={cn(entry.orderCount === 0 && 'text-muted-foreground')}>
@@ -63,9 +67,11 @@ export const AgingBreakdown = ({ aging, currency }: AgingBreakdownProps) => {
             role="img"
             aria-label={`${BUCKET_LABELS[entry.bucket]}: ${formatMinor(entry.amountMinor, currency)} across ${entry.orderCount} orders`}
           >
-            <div
-              className={cn('h-full rounded-full transition-all', BUCKET_TONES[entry.bucket])}
-              style={{ width: `${Math.round((entry.amountMinor / largest) * 100)}%` }}
+            <motion.div
+              className={cn('h-full rounded-full', BUCKET_TONES[entry.bucket])}
+              initial={prefersReducedMotion ? false : { width: 0 }}
+              animate={{ width: `${Math.round((entry.amountMinor / largest) * 100)}%` }}
+              transition={{ duration: 0.45, delay: index * 0.05, ease: 'easeOut' }}
             />
           </div>
         </li>
