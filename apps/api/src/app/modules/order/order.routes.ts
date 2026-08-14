@@ -1,8 +1,8 @@
 import { createOrderSchema, updateOrderSchema } from '@crossval/shared';
 import { Router } from 'express';
-import requireAuth from '../../middlewares/auth';
-import validateRequest from '../../middlewares/validateRequest';
-import { orderController } from './order.controller';
+import requireAuth from '../../middlewares/auth.js';
+import validateRequest from '../../middlewares/validateRequest.js';
+import { orderController } from './order.controller.js';
 
 const router = Router();
 

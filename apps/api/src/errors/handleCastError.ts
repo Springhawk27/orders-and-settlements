@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import type mongoose from 'mongoose';
-import type { SimplifiedError } from '../interfaces/error';
+import type { SimplifiedError } from '../interfaces/error.js';
 
 /** Raised when a path cannot be cast, most often a malformed ObjectId in the URL. */
 const handleCastError = (error: mongoose.Error.CastError): SimplifiedError => ({

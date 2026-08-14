@@ -1,6 +1,6 @@
 import rateLimit, { type Options } from 'express-rate-limit';
 import { StatusCodes } from 'http-status-codes';
-import config from '../../config';
+import config from '../../config/index.js';
 
 /**
  * Counters live in process memory, so on a serverless deployment each instance

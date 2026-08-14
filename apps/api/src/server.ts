@@ -1,6 +1,6 @@
-import app from './app';
-import config from './config';
-import logger from './shared/logger';
+import app from './app.js';
+import config from './config/index.js';
+import logger from './shared/logger.js';
 
 /**
  * `listen` is called at module scope rather than after awaiting the database,

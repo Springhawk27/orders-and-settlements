@@ -8,14 +8,14 @@ import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { pinoHttp } from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
-import globalErrorHandler from './app/middlewares/globalErrorHandler';
-import notFound from './app/middlewares/notFound';
-import { apiRateLimiter } from './app/middlewares/rateLimiter';
-import routes from './app/routes';
-import config from './config';
-import { connectDatabase } from './config/database';
-import { openApiDocument } from './docs/openapi';
-import logger from './shared/logger';
+import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
+import notFound from './app/middlewares/notFound.js';
+import { apiRateLimiter } from './app/middlewares/rateLimiter.js';
+import routes from './app/routes/index.js';
+import config from './config/index.js';
+import { connectDatabase } from './config/database.js';
+import { openApiDocument } from './docs/openapi.js';
+import logger from './shared/logger.js';
 
 const app = express();
 

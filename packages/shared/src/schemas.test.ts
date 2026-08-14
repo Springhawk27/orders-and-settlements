@@ -6,7 +6,7 @@ import {
   recordPaymentSchema,
   registerSchema,
   updateOrderSchema,
-} from './schemas';
+} from './schemas.js';
 
 const validOrder = {
   customer: { name: 'Gulf Trading LLC', email: 'AP@GulfTrading.ae' },

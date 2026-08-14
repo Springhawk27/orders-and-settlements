@@ -5,7 +5,7 @@ import type {
   DisplayStatus,
   PaymentMethod,
   PaymentStatus,
-} from './constants';
+} from './constants.js';
 
 /** Every successful response is wrapped in this envelope. */
 export type ApiResponse<T> = {

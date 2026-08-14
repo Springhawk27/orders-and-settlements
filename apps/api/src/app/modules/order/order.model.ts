@@ -1,6 +1,6 @@
 import { SUPPORTED_CURRENCIES, PAYMENT_STATUSES } from '@crossval/shared';
 import { Schema, model, type Model } from 'mongoose';
-import type { LineItemAttrs, OrderAttrs, OrderCounterAttrs } from './order.interface';
+import type { LineItemAttrs, OrderAttrs, OrderCounterAttrs } from './order.interface.js';
 
 const lineItemSchema = new Schema<LineItemAttrs>(
   {

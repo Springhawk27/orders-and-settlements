@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import type { ZodError } from 'zod';
-import type { SimplifiedError } from '../interfaces/error';
+import type { SimplifiedError } from '../interfaces/error.js';
 
 const handleZodError = (error: ZodError): SimplifiedError => ({
   statusCode: StatusCodes.BAD_REQUEST,

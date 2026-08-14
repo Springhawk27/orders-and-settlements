@@ -1,5 +1,5 @@
 import { pino } from 'pino';
-import config from '../config';
+import config from '../config/index.js';
 
 // Pretty printing runs in a worker thread, which serverless does not allow.
 const usePrettyOutput = config.nodeEnv === 'development' && !process.env.VERCEL;

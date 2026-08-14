@@ -1,8 +1,8 @@
 import { recordPaymentSchema, voidPaymentSchema } from '@crossval/shared';
 import { Router } from 'express';
-import requireAuth from '../../middlewares/auth';
-import validateRequest from '../../middlewares/validateRequest';
-import { paymentController } from './payment.controller';
+import requireAuth from '../../middlewares/auth.js';
+import validateRequest from '../../middlewares/validateRequest.js';
+import { paymentController } from './payment.controller.js';
 
 // mergeParams so :orderId from the mount path reaches the controller.
 const orderScoped = Router({ mergeParams: true });

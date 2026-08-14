@@ -7,8 +7,8 @@ import {
   PAYMENT_METHODS,
   SORT_DIRECTIONS,
   SUPPORTED_CURRENCIES,
-} from './constants';
-import { MONEY_PATTERN, parseMoneyToMinor } from './money';
+} from './constants.js';
+import { MONEY_PATTERN, parseMoneyToMinor } from './money.js';
 
 /**
  * Accepts an amount as typed by a person and yields integer minor units.

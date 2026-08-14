@@ -1,6 +1,6 @@
 import { PAYMENT_METHODS } from '@crossval/shared';
 import { Schema, model, type Model } from 'mongoose';
-import type { PaymentAttrs } from './payment.interface';
+import type { PaymentAttrs } from './payment.interface.js';
 
 /**
  * The source of truth for what has been collected. `orders.amountPaidMinor` is

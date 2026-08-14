@@ -8,7 +8,7 @@ import {
   isOverdue,
   overdueCutoff,
   wasPaidLate,
-} from './order.utils';
+} from './order.utils.js';
 
 const utc = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 const DUE = utc('2026-09-14');

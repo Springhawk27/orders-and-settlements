@@ -12,13 +12,13 @@ import {
 } from '@crossval/shared';
 import { StatusCodes } from 'http-status-codes';
 import { Types, type QueryFilter } from 'mongoose';
-import ApiError from '../../../errors/ApiError';
-import { buildPaginationMeta } from '../../../helpers/pagination';
-import { toCsv } from '../../../shared/csv';
-import { auditService } from '../audit/audit.service';
-import type { LineItemAttrs, OrderAttrs } from './order.interface';
-import { Order } from './order.model';
-import { orderRepository, type OrderDocument } from './order.repository';
+import ApiError from '../../../errors/ApiError.js';
+import { buildPaginationMeta } from '../../../helpers/pagination.js';
+import { toCsv } from '../../../shared/csv.js';
+import { auditService } from '../audit/audit.service.js';
+import type { LineItemAttrs, OrderAttrs } from './order.interface.js';
+import { Order } from './order.model.js';
+import { orderRepository, type OrderDocument } from './order.repository.js';
 import {
   agingBucketFor,
   amountDueMinor,
@@ -26,7 +26,7 @@ import {
   deriveDisplayStatus,
   isOverdue,
   wasPaidLate,
-} from './order.utils';
+} from './order.utils.js';
 
 const toObjectId = (value: string): Types.ObjectId => new Types.ObjectId(value);
 

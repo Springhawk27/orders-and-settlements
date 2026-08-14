@@ -1,7 +1,7 @@
 import type { AuditAction, AuditEvent as AuditEventDto } from '@crossval/shared';
 import type { ClientSession, Types } from 'mongoose';
-import { AuditEvent } from './audit.model';
-import type { AuditEntityType } from './audit.interface';
+import { AuditEvent } from './audit.model.js';
+import type { AuditEntityType } from './audit.interface.js';
 
 type RecordInput = {
   userId: Types.ObjectId;

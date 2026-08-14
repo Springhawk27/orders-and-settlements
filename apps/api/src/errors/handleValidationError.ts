@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import type mongoose from 'mongoose';
-import type { SimplifiedError } from '../interfaces/error';
+import type { SimplifiedError } from '../interfaces/error.js';
 
 /**
  * Schema-level validation that Zod did not already cover, for example a

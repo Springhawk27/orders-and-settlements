@@ -1,10 +1,10 @@
 import type { LoginInput, RegisterInput } from '@crossval/shared';
 import type { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { getUserId } from '../../../helpers/requestUser';
-import sendResponse from '../../../shared/sendResponse';
-import { authService } from './auth.service';
-import { clearAuthCookies, readRefreshToken, setAuthCookies } from './auth.utils';
+import { getUserId } from '../../../helpers/requestUser.js';
+import sendResponse from '../../../shared/sendResponse.js';
+import { authService } from './auth.service.js';
+import { clearAuthCookies, readRefreshToken, setAuthCookies } from './auth.utils.js';
 
 const register: RequestHandler = async (req, res) => {
   const { user, tokens } = await authService.register(req.body as RegisterInput);

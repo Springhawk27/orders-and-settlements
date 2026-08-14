@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { authRoutes } from '../modules/auth/auth.routes';
-import { dashboardRoutes } from '../modules/dashboard/dashboard.routes';
-import { orderRoutes } from '../modules/order/order.routes';
-import { orderPaymentRoutes, paymentRoutes } from '../modules/payment/payment.routes';
+import { authRoutes } from '../modules/auth/auth.routes.js';
+import { dashboardRoutes } from '../modules/dashboard/dashboard.routes.js';
+import { orderRoutes } from '../modules/order/order.routes.js';
+import { orderPaymentRoutes, paymentRoutes } from '../modules/payment/payment.routes.js';
 
 const router = Router();
 

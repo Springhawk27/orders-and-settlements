@@ -1,8 +1,8 @@
 import type { CookieOptions, Request, Response } from 'express';
 import crypto from 'node:crypto';
-import config from '../../../config';
-import { millisecondsUntilExpiry } from '../../../helpers/jwtHelpers';
-import type { AuthTokens } from './auth.interface';
+import config from '../../../config/index.js';
+import { millisecondsUntilExpiry } from '../../../helpers/jwtHelpers.js';
+import type { AuthTokens } from './auth.interface.js';
 
 export const ACCESS_COOKIE = 'access_token';
 export const REFRESH_COOKIE = 'refresh_token';

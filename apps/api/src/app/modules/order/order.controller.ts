@@ -7,10 +7,10 @@ import {
 import type { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Types } from 'mongoose';
-import { getUserId } from '../../../helpers/requestUser';
-import sendResponse from '../../../shared/sendResponse';
-import { auditService } from '../audit/audit.service';
-import { orderService } from './order.service';
+import { getUserId } from '../../../helpers/requestUser.js';
+import sendResponse from '../../../shared/sendResponse.js';
+import { auditService } from '../audit/audit.service.js';
+import { orderService } from './order.service.js';
 
 const create: RequestHandler = async (req, res) => {
   const order = await orderService.create(getUserId(req), req.body as CreateOrderInput);

@@ -1,7 +1,7 @@
 import type { ClientSession, Types } from 'mongoose';
-import { Order } from '../order/order.model';
-import type { OrderDocument } from '../order/order.repository';
-import { Payment } from './payment.model';
+import { Order } from '../order/order.model.js';
+import type { OrderDocument } from '../order/order.repository.js';
+import { Payment } from './payment.model.js';
 
 /**
  * Moves an order's balance and recomputes its status atomically.

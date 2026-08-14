@@ -1,4 +1,4 @@
-import { DEFAULT_CURRENCY, MINOR_UNITS_PER_MAJOR, type Currency } from './constants';
+import { DEFAULT_CURRENCY, MINOR_UNITS_PER_MAJOR, type Currency } from './constants.js';
 
 /** A plain decimal with at most two fractional digits. No separators, no currency symbol. */
 export const MONEY_PATTERN = /^-?\d+(\.\d{1,2})?$/;

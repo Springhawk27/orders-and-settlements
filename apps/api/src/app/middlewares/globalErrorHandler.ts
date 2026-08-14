@@ -3,14 +3,14 @@ import type { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { ZodError } from 'zod';
-import config from '../../config';
-import ApiError from '../../errors/ApiError';
-import handleCastError from '../../errors/handleCastError';
-import handleDuplicateError from '../../errors/handleDuplicateError';
-import handleValidationError from '../../errors/handleValidationError';
-import handleZodError from '../../errors/handleZodError';
-import type { SimplifiedError } from '../../interfaces/error';
-import logger from '../../shared/logger';
+import config from '../../config/index.js';
+import ApiError from '../../errors/ApiError.js';
+import handleCastError from '../../errors/handleCastError.js';
+import handleDuplicateError from '../../errors/handleDuplicateError.js';
+import handleValidationError from '../../errors/handleValidationError.js';
+import handleZodError from '../../errors/handleZodError.js';
+import type { SimplifiedError } from '../../interfaces/error.js';
+import logger from '../../shared/logger.js';
 
 const isDuplicateKeyError = (error: unknown): error is { keyValue?: Record<string, unknown> } =>
   typeof error === 'object' &&

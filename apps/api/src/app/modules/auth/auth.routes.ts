@@ -1,9 +1,9 @@
 import { loginSchema, registerSchema } from '@crossval/shared';
 import { Router } from 'express';
-import requireAuth from '../../middlewares/auth';
-import { authRateLimiter } from '../../middlewares/rateLimiter';
-import validateRequest from '../../middlewares/validateRequest';
-import { authController } from './auth.controller';
+import requireAuth from '../../middlewares/auth.js';
+import { authRateLimiter } from '../../middlewares/rateLimiter.js';
+import validateRequest from '../../middlewares/validateRequest.js';
+import { authController } from './auth.controller.js';
 
 const router = Router();
 

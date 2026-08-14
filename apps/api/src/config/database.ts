@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import logger from '../shared/logger';
-import config from '.';
+import logger from '../shared/logger.js';
+import config from './index.js';
 
 type ConnectionCache = {
   conn: typeof mongoose | null;

@@ -3,13 +3,13 @@ import bcrypt from 'bcryptjs';
 import { StatusCodes } from 'http-status-codes';
 import { Types, type HydratedDocument } from 'mongoose';
 import crypto from 'node:crypto';
-import config from '../../../config';
-import ApiError from '../../../errors/ApiError';
-import { millisecondsUntilExpiry, signToken, verifyToken } from '../../../helpers/jwtHelpers';
-import logger from '../../../shared/logger';
-import type { AuthTokens, RefreshTokenPayload, UserAttrs } from './auth.interface';
-import { Session, User } from './auth.model';
-import { hashToken } from './auth.utils';
+import config from '../../../config/index.js';
+import ApiError from '../../../errors/ApiError.js';
+import { millisecondsUntilExpiry, signToken, verifyToken } from '../../../helpers/jwtHelpers.js';
+import logger from '../../../shared/logger.js';
+import type { AuthTokens, RefreshTokenPayload, UserAttrs } from './auth.interface.js';
+import { Session, User } from './auth.model.js';
+import { hashToken } from './auth.utils.js';
 
 type AuthResult = {
   user: AuthUser;

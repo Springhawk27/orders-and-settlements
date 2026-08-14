@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import type { SimplifiedError } from '../interfaces/error';
+import type { SimplifiedError } from '../interfaces/error.js';
 
 type MongoDuplicateKeyError = {
   keyValue?: Record<string, unknown>;

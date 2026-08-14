@@ -1,5 +1,5 @@
 import { Schema, model, type Model } from 'mongoose';
-import type { SessionAttrs, UserAttrs } from './auth.interface';
+import type { SessionAttrs, UserAttrs } from './auth.interface.js';
 
 const userSchema = new Schema<UserAttrs>(
   {

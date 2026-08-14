@@ -7,14 +7,14 @@ import {
 } from '@crossval/shared';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
-import config from '../config';
-import { connectDatabase, disconnectDatabase } from '../config/database';
-import { AuditEvent } from '../app/modules/audit/audit.model';
-import { Session, User } from '../app/modules/auth/auth.model';
-import { Order, OrderCounter } from '../app/modules/order/order.model';
-import { derivePaymentStatus } from '../app/modules/order/order.utils';
-import { Payment } from '../app/modules/payment/payment.model';
-import logger from '../shared/logger';
+import config from '../config/index.js';
+import { connectDatabase, disconnectDatabase } from '../config/database.js';
+import { AuditEvent } from '../app/modules/audit/audit.model.js';
+import { Session, User } from '../app/modules/auth/auth.model.js';
+import { Order, OrderCounter } from '../app/modules/order/order.model.js';
+import { derivePaymentStatus } from '../app/modules/order/order.utils.js';
+import { Payment } from '../app/modules/payment/payment.model.js';
+import logger from '../shared/logger.js';
 
 const DEMO_EMAIL = 'demo@settlements.app';
 const DEMO_PASSWORD = 'demo-password-2026';

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
-import app from '../../src/app';
-import { createTestUser, type TestUser } from '../helpers/auth';
+import app from '../../src/app.js';
+import { createTestUser, type TestUser } from '../helpers/auth.js';
 
 const ORDERS = '/api/v1/orders';
 

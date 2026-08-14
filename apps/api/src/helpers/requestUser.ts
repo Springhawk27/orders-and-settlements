@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import ApiError from '../errors/ApiError';
+import ApiError from '../errors/ApiError.js';
 
 /**
  * `requireAuth` has already populated this. The check exists so a route that

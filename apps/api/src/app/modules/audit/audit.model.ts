@@ -1,6 +1,6 @@
 import { AUDIT_ACTIONS } from '@crossval/shared';
 import { Schema, model, type Model } from 'mongoose';
-import type { AuditEventAttrs } from './audit.interface';
+import type { AuditEventAttrs } from './audit.interface.js';
 
 /**
  * Append only. Nothing in the application updates or deletes a row here, which

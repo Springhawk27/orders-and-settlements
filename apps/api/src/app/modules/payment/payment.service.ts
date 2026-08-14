@@ -7,15 +7,15 @@ import {
 } from '@crossval/shared';
 import { StatusCodes } from 'http-status-codes';
 import mongoose, { Types } from 'mongoose';
-import ApiError from '../../../errors/ApiError';
-import { auditService } from '../audit/audit.service';
-import { Order } from '../order/order.model';
-import type { OrderDocument } from '../order/order.repository';
-import { amountDueMinor } from '../order/order.utils';
-import { orderService } from '../order/order.service';
-import type { PaymentAttrs, PaymentDocument } from './payment.interface';
-import { Payment } from './payment.model';
-import { paymentRepository } from './payment.repository';
+import ApiError from '../../../errors/ApiError.js';
+import { auditService } from '../audit/audit.service.js';
+import { Order } from '../order/order.model.js';
+import type { OrderDocument } from '../order/order.repository.js';
+import { amountDueMinor } from '../order/order.utils.js';
+import { orderService } from '../order/order.service.js';
+import type { PaymentAttrs, PaymentDocument } from './payment.interface.js';
+import { Payment } from './payment.model.js';
+import { paymentRepository } from './payment.repository.js';
 
 const toObjectId = (value: string): Types.ObjectId => new Types.ObjectId(value);
 

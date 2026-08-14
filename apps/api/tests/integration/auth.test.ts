@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import app from '../../src/app';
-import { Session } from '../../src/app/modules/auth/auth.model';
+import app from '../../src/app.js';
+import { Session } from '../../src/app/modules/auth/auth.model.js';
 
 const BASE = '/api/v1/auth';
 

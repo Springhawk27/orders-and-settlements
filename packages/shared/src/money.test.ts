@@ -6,7 +6,7 @@ import {
   minorToInputValue,
   parseMoneyToMinor,
   sumMinor,
-} from './money';
+} from './money.js';
 
 describe('parseMoneyToMinor', () => {
   it('converts whole and fractional amounts', () => {

@@ -1,9 +1,9 @@
 import type { RecordPaymentInput, VoidPaymentInput } from '@crossval/shared';
 import type { Request, RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { getUserId } from '../../../helpers/requestUser';
-import sendResponse from '../../../shared/sendResponse';
-import { paymentService } from './payment.service';
+import { getUserId } from '../../../helpers/requestUser.js';
+import sendResponse from '../../../shared/sendResponse.js';
+import { paymentService } from './payment.service.js';
 
 const readIdempotencyKey = (req: Request): string | undefined => {
   const header = req.get('Idempotency-Key');

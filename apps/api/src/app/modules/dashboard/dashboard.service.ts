@@ -9,9 +9,9 @@ import {
   type DisplayStatus,
 } from '@crossval/shared';
 import { Types } from 'mongoose';
-import { Order } from '../order/order.model';
-import { overdueCutoff } from '../order/order.utils';
-import { Payment } from '../payment/payment.model';
+import { Order } from '../order/order.model.js';
+import { overdueCutoff } from '../order/order.utils.js';
+import { Payment } from '../payment/payment.model.js';
 
 type StatusCount = { _id: string; count: number };
 type BucketTotal = { _id: AgingBucket; orderCount: number; amountMinor: number };
