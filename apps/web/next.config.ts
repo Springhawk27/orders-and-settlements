@@ -5,8 +5,6 @@ import type { NextConfig } from 'next';
 const apiOrigin = process.env.API_ORIGIN ?? 'http://localhost:5000';
 
 const nextConfig: NextConfig = {
-  // The shared contract package ships as TypeScript source, so Next compiles it
-  // alongside the app rather than consuming a prebuilt bundle.
   transpilePackages: ['@crossval/shared'],
 
   // The browser only ever talks to the web origin. That keeps the API's

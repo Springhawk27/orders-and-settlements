@@ -1,10 +1,9 @@
 import { pino } from 'pino';
 import config from '../config';
 
-/**
- * Console transport only. Serverless filesystems are read only, so a file
- * transport would fail at runtime rather than in development.
- */
+// Pretty printing runs in a worker thread, which serverless does not allow.
+const usePrettyOutput = config.nodeEnv === 'development' && !process.env.VERCEL;
+
 export const logger = pino({
   level: config.logLevel,
   redact: {
@@ -18,14 +17,14 @@ export const logger = pino({
     ],
     remove: true,
   },
-  ...(config.isProduction || config.isTest
-    ? {}
-    : {
+  ...(usePrettyOutput
+    ? {
         transport: {
           target: 'pino-pretty',
           options: { colorize: true, translateTime: 'SYS:HH:MM:ss', ignore: 'pid,hostname' },
         },
-      }),
+      }
+    : {}),
 });
 
 export default logger;

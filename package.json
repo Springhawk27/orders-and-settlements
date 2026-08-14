@@ -7,10 +7,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev": "pnpm --parallel --filter @crossval/shared --filter \"./apps/*\" dev",
     "dev:api": "pnpm --filter @crossval/api dev",
     "dev:web": "pnpm --filter @crossval/web dev",
-    "build": "pnpm --filter \"./apps/*\" build",
+    "build": "pnpm --recursive build",
     "test": "pnpm --recursive --sequential test",
     "lint": "pnpm --recursive lint",
     "typecheck": "pnpm --recursive typecheck",

@@ -61,11 +61,17 @@ app.get('/api/docs.json', (_req, res) => {
   res.json(openApiDocument);
 });
 
-app.use(
-  '/api/docs',
-  swaggerUi.serve,
-  swaggerUi.setup(openApiDocument, { customSiteTitle: 'Orders and Settlements API' }),
-);
+// The UI reads files from swagger-ui-dist, which a bundler may not trace in.
+// Losing the docs page should not stop the API serving requests.
+try {
+  app.use(
+    '/api/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openApiDocument, { customSiteTitle: 'Orders and Settlements API' }),
+  );
+} catch (error) {
+  logger.warn({ err: error }, 'swagger ui unavailable, serving the raw spec at /api/docs.json');
+}
 
 app.use(apiRateLimiter);
 app.use(`/api/${API_VERSION}`, routes);
