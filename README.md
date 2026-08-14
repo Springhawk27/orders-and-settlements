@@ -81,7 +81,7 @@ they cannot describe a contract the server does not enforce.
 | GET    | `/orders/:orderId/payments`                    | Payment history, including reversals                                         |
 | POST   | `/orders/:orderId/payments`                    | Record a payment. Accepts `Idempotency-Key`                                  |
 | GET    | `/orders/:orderId/payments/reconcile`          | Recompute the balance from the payments and compare                          |
-| POST   | `/payments/:id/void`                           | Write a reversing entry                                                      |
+| POST   | `/payments/:id/void`                           | Refund or reverse a payment with a compensating entry                        |
 | GET    | `/dashboard/summary`                           | Outstanding, overdue, collections, status counts, ageing                     |
 
 Success responses are `{ statusCode, success, message, meta?, data }`. Failures carry a field path
@@ -314,6 +314,10 @@ system, which is worse than a looser rule the audit trail makes safe.
 The lock is not permanent: voiding every payment releases the line items again, because the thing
 that justified freezing them is gone.
 
+**Refunds use the same mechanism.** Money going back out is a compensating entry against the order,
+never an edit or a delete of the original payment. History stays append-only and the balance is
+always the sum of the entries standing against the order.
+
 The UI states this at the point of use. The edit page renders line items read-only with the reason
 and the amount collected, and the delete action is disabled with an explanation rather than failing
 on click.
@@ -340,6 +344,26 @@ fail when the guard is removed.
 Also covered: tenant isolation, idempotent replay, the edit lock and its release after a void, CSV
 escaping of a name containing a comma, stable pagination when sort values tie, and auth including
 session rotation and identical responses for a wrong password and an unknown account.
+
+## Security and operations
+
+Environment variables are validated with Zod at boot, so a missing `DATABASE_URL` or a too-short
+JWT secret stops the process with a named error rather than failing on the first request that needs
+it. No secret is committed; `.env.example` lists every variable the app reads.
+
+Logs are structured JSON from pino. `authorization`, `cookie`, `set-cookie` and any `password`,
+`passwordHash` or `token` field are stripped before a line is written, so credentials cannot reach
+a log collector. Request logging is on for everything except `/health`, which would otherwise
+dominate the output.
+
+`/health` reports version, uptime and real database connectivity for an uptime monitor to poll. It
+opens the connection rather than reporting on one some other request happened to make, so a cold
+instance answers with the truth instead of `disconnected`.
+
+Passwords are bcrypt at cost 12. Refresh tokens are stored as SHA-256 hashes and rotated on use, so
+a leaked database yields no usable token, and reuse of an already-rotated token revokes every
+session for that user. Helmet sets the standard headers, requests are rate limited, and the JSON
+body is capped at 100kb.
 
 ## Assumptions and trade-offs
 
@@ -380,6 +404,10 @@ IP. Production would use VPC peering or a static-egress proxy. A deployment cons
 a design choice, and worth stating rather than hiding.
 
 **Rate limiting needs a shared store** so the limit is global rather than per instance.
+
+**Backups are whatever the Atlas tier gives.** The free tier has none. Production wants continuous
+backup with point-in-time restore, which the audit trail complements: a restore can be reconciled
+against what the ledger says happened rather than trusted blindly.
 
 **Idempotency keys should expire and cover responses.** Today only successful payments are keyed
 and the records live forever; a production version would store the response envelope and expire
