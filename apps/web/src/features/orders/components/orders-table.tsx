@@ -1,6 +1,7 @@
 'use client';
 
 import type { OrderSummary } from '@crossval/shared';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Money } from '@/components/shared/money';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -44,15 +45,24 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
           <TableHead className="hidden text-right lg:table-cell">Paid</TableHead>
           <TableHead className="text-right">Due</TableHead>
           <TableHead className="hidden sm:table-cell">Due date</TableHead>
+          <TableHead>
+            <span className="sr-only">Open</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {orders.map((order) => (
-          <TableRow key={order.id} className="group">
+          /**
+           * The whole row opens the order. The link sits on the order number and
+           * stretches over the row with a pseudo-element, so there is still one
+           * real anchor: keyboard focus, middle-click and copy-link all behave
+           * normally, which a click handler on the row would break.
+           */
+          <TableRow key={order.id} className="group relative cursor-pointer">
             <TableCell className="font-medium">
               <Link
                 href={`/orders/${order.id}`}
-                className="underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+                className="rounded-sm underline-offset-4 after:absolute after:inset-0 after:content-[''] group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {order.orderNumber}
               </Link>
@@ -84,12 +94,18 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
                 currency={order.currency}
                 className={cn(
                   'font-medium',
-                  order.amountDueMinor === 0 && 'text-muted-foreground font-normal',
+                  order.amountDueMinor === 0 && 'font-normal text-muted-foreground',
                 )}
               />
             </TableCell>
             <TableCell className="hidden sm:table-cell">
               <DueDate order={order} />
+            </TableCell>
+            <TableCell className="w-8">
+              <ChevronRight
+                aria-hidden
+                className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+              />
             </TableCell>
           </TableRow>
         ))}

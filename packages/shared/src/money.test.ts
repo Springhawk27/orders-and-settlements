@@ -3,6 +3,7 @@ import {
   MoneyParseError,
   formatMinor,
   lineTotalMinor,
+  minorToInputValue,
   parseMoneyToMinor,
   sumMinor,
   toMajor,
@@ -83,6 +84,17 @@ describe('formatMinor', () => {
       const minor = parseMoneyToMinor(amount);
       const formatted = formatMinor(minor).replace(/[^\d.]/g, '');
       expect(parseMoneyToMinor(formatted)).toBe(minor);
+    }
+  });
+});
+
+describe('minorToInputValue', () => {
+  it('renders a value a form field can hold and the parser can read back', () => {
+    for (const minor of [0, 1, 50, 1999, 125050, 99999999]) {
+      const asInput = minorToInputValue(minor);
+
+      expect(asInput).toMatch(/^\d+\.\d{2}$/);
+      expect(parseMoneyToMinor(asInput)).toBe(minor);
     }
   });
 });

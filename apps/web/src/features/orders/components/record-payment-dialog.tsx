@@ -3,6 +3,7 @@
 import {
   PAYMENT_METHODS,
   formatMinor,
+  minorToInputValue,
   recordPaymentSchema,
   type Order,
   type PaymentMethod,
@@ -86,7 +87,7 @@ export const RecordPaymentDialog = ({ order }: RecordPaymentDialogProps) => {
           orderId: order.id,
           // Back to a decimal string for the wire; the API parses it again and
           // stays the authority on what a valid amount is.
-          amount: (values.amountMinor / 100).toFixed(2),
+          amount: minorToInputValue(values.amountMinor),
           ...(values.method && { method: values.method }),
           ...(values.reference && { reference: values.reference }),
           ...(values.note && { note: values.note }),
@@ -131,7 +132,7 @@ export const RecordPaymentDialog = ({ order }: RecordPaymentDialogProps) => {
                   size="sm"
                   className="h-auto p-0 text-xs"
                   onClick={() =>
-                    setValue('amount', (order.amountDueMinor / 100).toFixed(2), {
+                    setValue('amount', minorToInputValue(order.amountDueMinor), {
                       shouldValidate: true,
                     })
                   }

@@ -130,4 +130,21 @@ body {
   html {
     @apply font-sans;
   }
+
+  /* Tailwind 4 dropped the opinionated cursor on buttons, so without this every
+     button in the app shows an arrow. Disabled controls are excluded so they
+     still read as unavailable. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='menuitem']:not([data-disabled]),
+  [role='option'],
+  summary {
+    cursor: pointer;
+  }
+
+  /* Money and counts line up column to column rather than jittering as digits
+     change width. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
 }

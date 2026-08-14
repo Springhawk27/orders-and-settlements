@@ -21,6 +21,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { useOrder, useOrderAudit, useOrderPayments } from '../hooks';
 import { AuditTimeline } from './audit-timeline';
+import { OrderActions } from './order-actions';
 import { PaymentHistory } from './payment-history';
 import { RecordPaymentDialog } from './record-payment-dialog';
 
@@ -82,7 +83,12 @@ export const OrderDetail = ({ orderId }: { orderId: string }) => {
       <PageHeader
         title={data.orderNumber}
         description={data.customer.email ?? undefined}
-        action={<RecordPaymentDialog order={data} />}
+        action={
+          <>
+            <OrderActions order={data} />
+            <RecordPaymentDialog order={data} />
+          </>
+        }
       />
 
       <div className="flex flex-wrap items-center gap-3">

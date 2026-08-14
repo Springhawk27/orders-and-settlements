@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import app from '../../src/app';
+import { Session } from '../../src/app/modules/auth/auth.model';
 
 const BASE = '/api/v1/auth';
 
@@ -150,27 +151,35 @@ describe('POST /auth/refresh', () => {
     expect(cookieNamed(response.headers, 'refresh_token')).toBeDefined();
   });
 
-  it('refuses a refresh token that has already been rotated', async () => {
+  it('still works when the same token is replayed moments later', async () => {
     const registered = await registerUser();
     const originalCookies = cookiesFrom(registered.headers);
 
     const first = await request(app).post(`${BASE}/refresh`).set('Cookie', originalCookies);
     expect(first.status).toBe(200);
 
-    // Replaying the original token: it verifies, but its session is gone.
+    // A second tab, or a request already in flight, still holding the cookie the
+    // first exchange replaced. Treating this as theft would sign people out
+    // during ordinary use.
     const replay = await request(app).post(`${BASE}/refresh`).set('Cookie', originalCookies);
-    expect(replay.status).toBe(401);
+    expect(replay.status).toBe(200);
   });
 
-  it('revokes every session once reuse is detected', async () => {
+  it('revokes every session when a token is replayed long after it was exchanged', async () => {
     const registered = await registerUser();
     const originalCookies = cookiesFrom(registered.headers);
 
     const rotated = await request(app).post(`${BASE}/refresh`).set('Cookie', originalCookies);
-    await request(app).post(`${BASE}/refresh`).set('Cookie', originalCookies);
+    expect(rotated.status).toBe(200);
 
-    // The token handed out by the legitimate rotation is dead too, because a
-    // leak was assumed and every session for the user was dropped.
+    // Age the exchange past the grace window rather than waiting for it.
+    await Session.updateMany({}, { $set: { rotatedAt: new Date(Date.now() - 60_000) } });
+
+    const replay = await request(app).post(`${BASE}/refresh`).set('Cookie', originalCookies);
+    expect(replay.status).toBe(401);
+
+    // The token from the legitimate rotation is dead too: a leak was assumed
+    // and every session for the user was dropped.
     const afterRevocation = await request(app)
       .post(`${BASE}/refresh`)
       .set('Cookie', cookiesFrom(rotated.headers));

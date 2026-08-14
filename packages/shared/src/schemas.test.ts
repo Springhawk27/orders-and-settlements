@@ -84,6 +84,26 @@ describe('createOrderSchema', () => {
     expect(createOrderSchema.safeParse(withoutDueDate).success).toBe(false);
   });
 
+  it('accepts a blank optional email, which is what a form submits', () => {
+    // The field is optional in the UI, so leaving it untouched must not fail.
+    const result = createOrderSchema.safeParse({
+      ...validOrder,
+      customer: { name: 'Gulf Trading LLC', email: '' },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.customer.email).toBeUndefined();
+  });
+
+  it('still rejects a malformed optional email', () => {
+    const result = createOrderSchema.safeParse({
+      ...validOrder,
+      customer: { name: 'Gulf Trading LLC', email: 'not-an-email' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it('rejects a malformed due date', () => {
     expect(createOrderSchema.safeParse({ ...validOrder, dueDate: '14-09-2026' }).success).toBe(
       false,

@@ -42,6 +42,16 @@ export const emailSchema = z
   .toLowerCase()
   .pipe(z.email({ error: 'Enter a valid email address' }));
 
+/**
+ * An optional email as a form actually submits one. An untouched input sends
+ * `""`, not `undefined`, and treating that as a malformed address would reject
+ * the field for being left blank — which is the opposite of optional.
+ */
+export const optionalEmailSchema = z
+  .union([z.literal(''), emailSchema])
+  .transform((value) => (value === '' ? undefined : value))
+  .optional();
+
 export const passwordSchema = z
   .string()
   .min(8, { error: 'Password must be at least 8 characters' })
@@ -76,7 +86,7 @@ export const lineItemInputSchema = z
 export const createOrderSchema = z.object({
   customer: z.object({
     name: z.string().trim().min(1, { error: 'Customer name is required' }).max(160),
-    email: emailSchema.optional(),
+    email: optionalEmailSchema,
   }),
   currency: z.enum(SUPPORTED_CURRENCIES).default(DEFAULT_CURRENCY),
   issueDate: calendarDate.optional(),
@@ -98,7 +108,7 @@ export const updateOrderSchema = z
     customer: z
       .object({
         name: z.string().trim().min(1).max(160).optional(),
-        email: emailSchema.optional(),
+        email: optionalEmailSchema,
       })
       .optional(),
     dueDate: calendarDate.optional(),

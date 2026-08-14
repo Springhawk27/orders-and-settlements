@@ -17,6 +17,7 @@ const sessionSchema = new Schema<SessionAttrs>(
     // Only the hash is stored, so a database leak does not hand over live refresh tokens.
     tokenHash: { type: String, required: true, unique: true },
     expiresAt: { type: Date, required: true },
+    rotatedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

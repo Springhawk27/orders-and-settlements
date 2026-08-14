@@ -55,6 +55,13 @@ export const formatMinor = (minorUnits: number, currency: Currency = DEFAULT_CUR
 /** Minor units as a decimal number. For charts and other numeric consumers only. */
 export const toMajor = (minorUnits: number): number => minorUnits / MINOR_UNITS_PER_MAJOR;
 
+/**
+ * Minor units as a plain decimal string to put in a form field: no currency,
+ * no separators, always two places. Round-trips through `parseMoneyToMinor`.
+ */
+export const minorToInputValue = (minorUnits: number): string =>
+  (minorUnits / MINOR_UNITS_PER_MAJOR).toFixed(2);
+
 /** Integer multiplied by integer, so the result is exact at any scale. */
 export const lineTotalMinor = (quantity: number, unitPriceMinor: number): number =>
   quantity * unitPriceMinor;

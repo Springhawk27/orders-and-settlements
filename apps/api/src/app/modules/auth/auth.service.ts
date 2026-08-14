@@ -41,6 +41,7 @@ const issueTokens = async (user: HydratedDocument<UserAttrs>): Promise<AuthToken
     userId: user._id,
     tokenHash: hashToken(refreshToken),
     expiresAt: new Date(Date.now() + millisecondsUntilExpiry(refreshToken)),
+    rotatedAt: null,
   });
 
   return { accessToken, refreshToken };
@@ -85,6 +86,18 @@ const login = async (input: LoginInput): Promise<AuthResult> => {
 const sessionExpired = () =>
   new ApiError(StatusCodes.UNAUTHORIZED, 'Session expired, please sign in again');
 
+/**
+ * How long a just-exchanged refresh token keeps working.
+ *
+ * Strict single-use rotation is the textbook rule, but on its own it signs
+ * people out during ordinary use: a second tab, or a request already in flight,
+ * still holds the cookie the first exchange replaced. Cookies are shared across
+ * tabs while any client-side de-duplication is not. A short window absorbs that
+ * without giving a stolen token any meaningful life, since the access token it
+ * buys lasts minutes.
+ */
+const REPLAY_GRACE_MS = 30_000;
+
 const refresh = async (refreshToken: string | undefined): Promise<AuthResult> => {
   if (!refreshToken) {
     throw sessionExpired();
@@ -98,16 +111,31 @@ const refresh = async (refreshToken: string | undefined): Promise<AuthResult> =>
     throw sessionExpired();
   }
 
-  // Deleting and reading in one operation means two concurrent refreshes cannot
-  // both succeed: whichever loses the race finds nothing.
-  const session = await Session.findOneAndDelete({ tokenHash: hashToken(refreshToken) });
+  const tokenHash = hashToken(refreshToken);
 
-  if (!session) {
-    // The signature is valid but the session is already gone, so this token was
-    // rotated earlier and is being replayed. Assume it leaked and end every session.
-    await Session.deleteMany({ userId: new Types.ObjectId(payload.sub) });
-    logger.warn({ userId: payload.sub }, 'refresh token reuse detected, sessions revoked');
-    throw sessionExpired();
+  // Claiming the session and marking it rotated in one operation, so two
+  // concurrent refreshes cannot both win the race.
+  const claimed = await Session.findOneAndUpdate(
+    { tokenHash, rotatedAt: null },
+    { $set: { rotatedAt: new Date() } },
+  );
+
+  if (!claimed) {
+    const alreadyRotated = await Session.findOne({ tokenHash });
+    const rotatedAt = alreadyRotated?.rotatedAt;
+
+    // A token replayed long after it was exchanged is treated as stolen and
+    // every session for the user is dropped.
+    if (!rotatedAt || Date.now() - rotatedAt.getTime() > REPLAY_GRACE_MS) {
+      await Session.deleteMany({ userId: new Types.ObjectId(payload.sub) });
+      logger.warn({ userId: payload.sub }, 'refresh token reuse detected, sessions revoked');
+      throw sessionExpired();
+    }
+
+    // Inside the grace window this is ordinary behaviour rather than theft: a
+    // second tab, or a retry, still holding the cookie the first one just
+    // exchanged. Revoking here would sign people out during normal use.
+    logger.debug({ userId: payload.sub }, 'refresh replayed within the grace window');
   }
 
   const user = await User.findById(payload.sub);

@@ -63,6 +63,24 @@ const refreshSession = (): Promise<boolean> => {
   return inFlightRefresh;
 };
 
+/**
+ * The session is over but the browser still holds cookies for it. Without
+ * clearing them the route guard sees a session, sends the visitor to the
+ * dashboard, and every request there fails — a loop with no way back to the
+ * sign-in page.
+ */
+const endDeadSession = async (): Promise<void> => {
+  if (typeof window === 'undefined' || window.location.pathname.startsWith('/login')) {
+    return;
+  }
+
+  await fetch(`${BASE_PATH}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(
+    () => undefined,
+  );
+
+  window.location.href = '/login';
+};
+
 type RequestConfig = {
   method: string;
   body?: unknown;
@@ -99,6 +117,8 @@ const request = async <T>(
     if (await refreshSession()) {
       return request<T>(path, config, false);
     }
+
+    await endDeadSession();
   }
 
   // A gateway or a crash can answer with something that is not the envelope,

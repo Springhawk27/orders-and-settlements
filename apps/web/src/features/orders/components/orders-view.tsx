@@ -1,8 +1,9 @@
 'use client';
 
-import type { DisplayStatus } from '@crossval/shared';
+import { DISPLAY_STATUSES, type DisplayStatus } from '@crossval/shared';
 import { FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
@@ -10,16 +11,30 @@ import { TableSkeleton } from '@/components/shared/loading-skeletons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useOrders } from '../hooks';
+import { ExportOrdersButton } from './export-orders-button';
 import { OrdersFilters } from './orders-filters';
 import { OrdersPagination } from './orders-pagination';
 import { OrdersTable } from './orders-table';
 
 const PAGE_SIZE = 20;
 
+const isDisplayStatus = (value: string | null): value is DisplayStatus =>
+  value !== null && (DISPLAY_STATUSES as readonly string[]).includes(value);
+
 export const OrdersView = () => {
+  // Seeded from the URL so links like /orders?status=overdue arrive filtered.
+  // The dashboard sends people here that way, and ignoring the parameter would
+  // silently drop them on an unfiltered list.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const initialStatus = searchParams.get('status');
+
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [status, setStatus] = useState<DisplayStatus | undefined>();
+  const [status, setStatus] = useState<DisplayStatus | undefined>(
+    isDisplayStatus(initialStatus) ? initialStatus : undefined,
+  );
   const [page, setPage] = useState(1);
 
   // Typing should not fire a request per keystroke.
@@ -37,9 +52,13 @@ export const OrdersView = () => {
     setPage(1);
   };
 
+  // The URL is kept in step with the status filter so the page can be
+  // refreshed, bookmarked or shared and come back showing the same thing.
+  // `replace` rather than `push`, so filtering does not fill up the back button.
   const handleStatusChange = (value: DisplayStatus | undefined) => {
     setStatus(value);
     setPage(1);
+    router.replace(value ? `${pathname}?status=${value}` : pathname, { scroll: false });
   };
 
   const params = useMemo(
@@ -63,12 +82,15 @@ export const OrdersView = () => {
         title="Orders"
         description="Every order, what has been collected against it, and what is still owed."
         action={
-          <Button asChild>
-            <Link href="/orders/new">
-              <Plus className="size-4" />
-              New order
-            </Link>
-          </Button>
+          <>
+            <ExportOrdersButton />
+            <Button asChild>
+              <Link href="/orders/new">
+                <Plus className="size-4" />
+                New order
+              </Link>
+            </Button>
+          </>
         }
       />
 

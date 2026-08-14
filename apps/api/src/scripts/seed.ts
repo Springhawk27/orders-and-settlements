@@ -122,6 +122,49 @@ const seedOrders: SeedOrder[] = [
   },
 ];
 
+const FILLER_CUSTOMERS = [
+  'Al Quoz Printing',
+  'Deira Wholesale',
+  'Palm Facilities Group',
+  'Creek Marine Services',
+  'Yas Events Company',
+  'Mussafah Industrial',
+  'Karama Textiles',
+  'Silicon Oasis Systems',
+  'Bur Dubai Catering',
+  'Fujairah Freight',
+  'Ajman Packaging',
+  'Motor City Automotive',
+  'Discovery Gardens Retail',
+  'Barsha Heights Media',
+  'Dubai Marina Fitness',
+  'Umm Suqeim Interiors',
+];
+
+/**
+ * Enough orders that the list runs to a second page. Pagination hides itself
+ * when everything fits on one, so without these a reviewer never sees it.
+ */
+const fillerOrders: SeedOrder[] = FILLER_CUSTOMERS.map((customer, index) => {
+  const issuedDaysAgo = 4 + index * 3;
+  const dueInDays = 30 - issuedDaysAgo;
+  const unitPrice = (1200 + index * 340).toFixed(2);
+  const quantity = 1 + (index % 4);
+  const total = Number(unitPrice) * quantity;
+
+  // A repeating pattern across the set: unpaid, part paid, settled.
+  const payments =
+    index % 3 === 0 ? [] : index % 3 === 1 ? [(total * 0.4).toFixed(2)] : [total.toFixed(2)];
+
+  return {
+    customer,
+    issuedDaysAgo,
+    dueInDays,
+    lines: [{ description: 'Services rendered', quantity, unitPrice }],
+    payments,
+  };
+});
+
 const run = async (): Promise<void> => {
   await connectDatabase();
 
@@ -148,7 +191,7 @@ const run = async (): Promise<void> => {
   const year = new Date().getUTCFullYear();
   let sequence = 0;
 
-  for (const seed of seedOrders) {
+  for (const seed of [...seedOrders, ...fillerOrders]) {
     sequence += 1;
 
     const lineItems = seed.lines.map((line) => {
@@ -233,7 +276,7 @@ const run = async (): Promise<void> => {
   );
 
   logger.info(
-    { email: DEMO_EMAIL, orders: seedOrders.length },
+    { email: DEMO_EMAIL, orders: sequence },
     'demo data seeded — sign in with the demo credentials',
   );
 

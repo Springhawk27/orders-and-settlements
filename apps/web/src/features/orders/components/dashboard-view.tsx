@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDashboardSummary } from '../hooks';
 import { AgingBreakdown } from './aging-breakdown';
 import { KpiCard } from './kpi-card';
+import { NeedsAttention } from './needs-attention';
 
 const STATUS_ORDER = ['pending', 'partially_paid', 'overdue', 'paid'] as const;
 
@@ -89,6 +90,8 @@ export const DashboardView = () => {
           />
         </FadeIn>
       </div>
+
+      <NeedsAttention />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
