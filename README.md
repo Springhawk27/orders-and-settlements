@@ -6,8 +6,9 @@ outstanding, what is due and what is overdue.
 Payments are applied through a single atomic, idempotent write, so an order can never be
 over-paid, even when several payments arrive at the same instant.
 
-**Live app:** _added after deployment_
-**API docs:** _added after deployment_ (`/api/docs`)
+**Live app:** https://orders-and-settlements-web-drab.vercel.app
+
+**API docs:** https://orders-and-settlements-api-beta.vercel.app/api/docs
 
 **Demo account**, already loaded with 26 orders across every status and ageing bucket:
 
