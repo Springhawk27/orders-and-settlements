@@ -26,7 +26,7 @@ describe('POST /orders', () => {
     const response = await createOrder(owner);
 
     expect(response.status).toBe(201);
-    // 2 x AED 500.00, held as integer minor units.
+    // 2 x $500.00, held as integer minor units.
     expect(response.body.data).toMatchObject({
       subtotalMinor: 100000,
       totalMinor: 100000,
@@ -143,6 +143,48 @@ describe('GET /orders', () => {
       .get(`${ORDERS}?q=${beta.body.data.orderNumber}`)
       .set('Cookie', owner.cookies);
     expect(byNumber.body.data).toHaveLength(1);
+  });
+
+  it('returns the same order every time when sort values tie', async () => {
+    // Created in one go, so their createdAt values are identical. Without a
+    // tiebreaker the database is free to return them in any order, which both
+    // shuffles the list and breaks paging.
+    await Promise.all([createOrder(owner), createOrder(owner), createOrder(owner)]);
+
+    const pageOne = await request(app).get(ORDERS).set('Cookie', owner.cookies);
+    const pageTwo = await request(app).get(ORDERS).set('Cookie', owner.cookies);
+
+    const ids = (response: typeof pageOne) =>
+      response.body.data.map((order: { id: string }) => order.id);
+
+    expect(ids(pageOne)).toEqual(ids(pageTwo));
+  });
+
+  it('never repeats or drops a row across pages when values tie', async () => {
+    await Promise.all(Array.from({ length: 6 }, () => createOrder(owner)));
+
+    const first = await request(app).get(`${ORDERS}?page=1&limit=3`).set('Cookie', owner.cookies);
+    const second = await request(app).get(`${ORDERS}?page=2&limit=3`).set('Cookie', owner.cookies);
+
+    const seen = [...first.body.data, ...second.body.data].map((order: { id: string }) => order.id);
+
+    expect(new Set(seen).size).toBe(6);
+  });
+
+  it('sorts by a chosen field and direction', async () => {
+    await createOrder(owner, { dueDate: '2032-01-01' });
+    await createOrder(owner, { dueDate: '2030-01-01' });
+    await createOrder(owner, { dueDate: '2031-01-01' });
+
+    const response = await request(app)
+      .get(`${ORDERS}?sortBy=dueDate&sortDir=asc`)
+      .set('Cookie', owner.cookies);
+
+    const dates = response.body.data.map((order: { dueDate: string }) =>
+      order.dueDate.slice(0, 10),
+    );
+
+    expect(dates).toEqual([...dates].sort());
   });
 
   it('rejects a page size beyond the cap', async () => {

@@ -12,7 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useOrders } from '../hooks';
 import { ExportOrdersButton } from './export-orders-button';
-import { OrdersFilters } from './orders-filters';
+import { OrdersFilters, type SortChoice } from './orders-filters';
 import { OrdersPagination } from './orders-pagination';
 import { OrdersTable } from './orders-table';
 
@@ -35,6 +35,7 @@ export const OrdersView = () => {
   const [status, setStatus] = useState<DisplayStatus | undefined>(
     isDisplayStatus(initialStatus) ? initialStatus : undefined,
   );
+  const [sort, setSort] = useState<SortChoice>({ sortBy: 'createdAt', sortDir: 'desc' });
   const [page, setPage] = useState(1);
 
   // Typing should not fire a request per keystroke.
@@ -61,14 +62,20 @@ export const OrdersView = () => {
     router.replace(value ? `${pathname}?status=${value}` : pathname, { scroll: false });
   };
 
+  const handleSortChange = (value: SortChoice) => {
+    setSort(value);
+    setPage(1);
+  };
+
   const params = useMemo(
     () => ({
       page,
       limit: PAGE_SIZE,
+      ...sort,
       ...(debouncedSearch && { q: debouncedSearch }),
       ...(status && { status }),
     }),
-    [page, debouncedSearch, status],
+    [page, sort, debouncedSearch, status],
   );
 
   const { data, isPending, isError, error, refetch } = useOrders(params);
@@ -97,8 +104,10 @@ export const OrdersView = () => {
       <OrdersFilters
         search={search}
         status={status}
+        sort={sort}
         onSearchChange={handleSearchChange}
         onStatusChange={handleStatusChange}
+        onSortChange={handleSortChange}
       />
 
       {isError ? (

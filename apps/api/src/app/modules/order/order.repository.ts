@@ -46,9 +46,16 @@ export const buildOrderFilter = (
   return filter;
 };
 
-const buildSort = (query: OrderListQuery): Record<string, SortOrder> => ({
-  [query.sortBy]: query.sortDir === 'asc' ? 1 : -1,
-});
+/**
+ * `_id` breaks ties. Sorting on a field with duplicate values leaves the order
+ * of those rows undefined, which shuffles the list between refreshes and, worse,
+ * lets skip/limit pagination repeat one row on two pages while missing another.
+ */
+const buildSort = (query: OrderListQuery): Record<string, SortOrder> => {
+  const direction: SortOrder = query.sortDir === 'asc' ? 1 : -1;
+
+  return { [query.sortBy]: direction, _id: direction };
+};
 
 const findPage = async (
   filter: QueryFilter<OrderAttrs>,
