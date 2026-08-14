@@ -1,6 +1,6 @@
 'use client';
 
-import type { CreateOrderInput } from '@crossval/shared';
+import type { CreateOrderRequest, UpdateOrderRequest } from '@crossval/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -55,7 +55,7 @@ export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateOrderInput) => createOrder(input),
+    mutationFn: (input: CreateOrderRequest) => createOrder(input),
     onSuccess: async (order) => {
       toast.success(`Order ${order.orderNumber} created`);
       await queryClient.invalidateQueries({ queryKey: orderKeys.all });
@@ -68,7 +68,7 @@ export const useUpdateOrder = (orderId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: unknown) => updateOrder(orderId, input),
+    mutationFn: (input: UpdateOrderRequest) => updateOrder(orderId, input),
     onSuccess: async () => {
       toast.success('Order updated');
       await queryClient.invalidateQueries({ queryKey: orderKeys.all });

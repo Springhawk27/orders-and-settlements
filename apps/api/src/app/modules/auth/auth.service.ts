@@ -87,14 +87,10 @@ const sessionExpired = () =>
   new ApiError(StatusCodes.UNAUTHORIZED, 'Session expired, please sign in again');
 
 /**
- * How long a just-exchanged refresh token keeps working.
- *
- * Strict single-use rotation is the textbook rule, but on its own it signs
- * people out during ordinary use: a second tab, or a request already in flight,
- * still holds the cookie the first exchange replaced. Cookies are shared across
- * tabs while any client-side de-duplication is not. A short window absorbs that
- * without giving a stolen token any meaningful life, since the access token it
- * buys lasts minutes.
+ * How long a just-exchanged refresh token keeps working. Strict single-use
+ * rotation signs people out during ordinary use, because a second tab still
+ * holds the cookie the first one replaced and cookies are shared while
+ * client-side de-duplication is not.
  */
 const REPLAY_GRACE_MS = 30_000;
 

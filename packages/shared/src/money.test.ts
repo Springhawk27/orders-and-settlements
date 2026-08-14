@@ -6,7 +6,6 @@ import {
   minorToInputValue,
   parseMoneyToMinor,
   sumMinor,
-  toMajor,
 } from './money';
 
 describe('parseMoneyToMinor', () => {
@@ -74,9 +73,10 @@ describe('formatMinor', () => {
     expect(formatMinor(5)).toMatch(/0\.05/);
   });
 
-  it('includes the currency', () => {
-    expect(formatMinor(125050, 'AED')).toMatch(/AED/);
-    expect(formatMinor(125050, 'USD')).toMatch(/\$/);
+  it('matches the notation the brief uses for its sample scenario', () => {
+    expect(formatMinor(100000)).toBe('$1,000.00');
+    expect(formatMinor(40000)).toBe('$400.00');
+    expect(formatMinor(60000)).toBe('$600.00');
   });
 
   it('round-trips with parseMoneyToMinor', () => {
@@ -96,13 +96,6 @@ describe('minorToInputValue', () => {
       expect(asInput).toMatch(/^\d+\.\d{2}$/);
       expect(parseMoneyToMinor(asInput)).toBe(minor);
     }
-  });
-});
-
-describe('toMajor', () => {
-  it('converts minor units back to a decimal number', () => {
-    expect(toMajor(125050)).toBe(1250.5);
-    expect(toMajor(0)).toBe(0);
   });
 });
 

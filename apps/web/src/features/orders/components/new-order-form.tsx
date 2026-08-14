@@ -17,6 +17,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { handleFormApiError } from '@/lib/form-errors';
+import { reportInvalid } from '@/lib/report-invalid';
 import { useCreateOrder } from '../hooks';
 
 type FormInput = z.input<typeof createOrderSchema>;
@@ -63,9 +64,13 @@ export const NewOrderForm = () => {
     0,
   );
 
-  const onSubmit = async (values: FormOutput) => {
+  // The resolver validates and hands back parsed values, but the API parses the
+  // request itself and would reject those: a Date serialises to a full
+  // timestamp, and the amount fields are renamed. So the raw field values are
+  // what gets sent.
+  const onSubmit = async () => {
     try {
-      const order = await createOrder.mutateAsync(values);
+      const order = await createOrder.mutateAsync(form.getValues());
 
       router.push(`/orders/${order.id}`);
     } catch (error) {
@@ -74,7 +79,11 @@ export const NewOrderForm = () => {
   };
 
   return (
-    <form onSubmit={(event) => void handleSubmit(onSubmit)(event)} noValidate className="space-y-6">
+    <form
+      onSubmit={(event) => void handleSubmit(onSubmit, reportInvalid)(event)}
+      noValidate
+      className="space-y-6"
+    >
       <Card>
         <CardHeader>
           <CardTitle>Customer</CardTitle>

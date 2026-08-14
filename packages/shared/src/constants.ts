@@ -1,9 +1,13 @@
 export const API_VERSION = 'v1';
 
-/** ISO 4217 codes the app accepts. Amounts are always stored in minor units. */
-export const SUPPORTED_CURRENCIES = ['AED', 'USD'] as const;
+/**
+ * One currency. Orders store it, so adding more is schema-compatible, but the
+ * dashboard sums balances across all of them and totalling two currencies would
+ * be meaningless without per-currency aggregation and a rate at payment time.
+ */
+export const SUPPORTED_CURRENCIES = ['USD'] as const;
 export type Currency = (typeof SUPPORTED_CURRENCIES)[number];
-export const DEFAULT_CURRENCY: Currency = 'AED';
+export const DEFAULT_CURRENCY: Currency = 'USD';
 
 /**
  * Persisted on the order. A pure function of amount paid against the order
@@ -24,11 +28,6 @@ export const PAYMENT_STATUS = {
  */
 export const DISPLAY_STATUSES = ['pending', 'partially_paid', 'paid', 'overdue'] as const;
 export type DisplayStatus = (typeof DISPLAY_STATUSES)[number];
-
-export const DISPLAY_STATUS = {
-  ...PAYMENT_STATUS,
-  OVERDUE: 'overdue',
-} as const satisfies Record<string, DisplayStatus>;
 
 export const PAYMENT_METHODS = ['bank_transfer', 'card', 'cash', 'cheque', 'other'] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];

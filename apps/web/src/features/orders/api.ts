@@ -1,12 +1,13 @@
 import type {
   AuditEvent,
-  CreateOrderInput,
+  CreateOrderRequest,
   DashboardSummary,
   Order,
   OrderSummary,
   Payment,
   PaymentResult,
   PaginationMeta,
+  UpdateOrderRequest,
 } from '@crossval/shared';
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/lib/api-client';
 import type { OrderListParams } from './query-keys';
@@ -50,10 +51,12 @@ export const fetchOrderPayments = async (
   signal?: AbortSignal,
 ): Promise<Payment[]> => (await apiGet<Payment[]>(`/orders/${orderId}/payments`, { signal })).data;
 
-export const createOrder = async (input: CreateOrderInput): Promise<Order> =>
+// These take the unparsed request shape, not the schema's output: the API parses
+// the raw values itself, and a parsed one would fail its validation.
+export const createOrder = async (input: CreateOrderRequest): Promise<Order> =>
   (await apiPost<Order>('/orders', input)).data;
 
-export const updateOrder = async (orderId: string, input: unknown): Promise<Order> =>
+export const updateOrder = async (orderId: string, input: UpdateOrderRequest): Promise<Order> =>
   (await apiPatch<Order>(`/orders/${orderId}`, input)).data;
 
 export const deleteOrder = async (orderId: string): Promise<void> => {

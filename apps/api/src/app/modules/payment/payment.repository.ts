@@ -4,23 +4,15 @@ import type { OrderDocument } from '../order/order.repository';
 import { Payment } from './payment.model';
 
 /**
- * Move an order's balance by `deltaMinor` and recompute its status, in one
- * atomic operation.
+ * Moves an order's balance and recomputes its status atomically.
  *
- * The guard lives in the *filter*, not in application code. A read-then-check-
- * then-write would leave a window where two requests both read the old balance,
- * both decide there is room, and both write — collecting more than the order is
- * worth. Because a single-document update in MongoDB is atomic, putting the
- * condition in the filter closes that window: whichever request loses simply
- * fails to match and gets `null` back.
+ * The guard is in the filter rather than in application code: a read-then-write
+ * leaves a window where two requests both see room and both write. A pipeline
+ * update rather than `$set` so the new status is derived from the new balance in
+ * the same operation instead of from a value read earlier.
  *
- * The update is an aggregation pipeline rather than a plain `$set` so the new
- * status can be computed *from the new balance* in the same operation. Working
- * it out in application code would mean deriving it from a value read earlier,
- * which reintroduces the staleness the guard just removed.
- *
- * Returns `null` when the order does not exist, is not owned by this user, or
- * the change would take the balance outside `0 .. totalMinor`.
+ * Returns `null` if the order is not found, not owned, or the change would take
+ * the balance outside `0 .. totalMinor`.
  */
 export const applyBalanceDelta = async (
   orderId: Types.ObjectId,

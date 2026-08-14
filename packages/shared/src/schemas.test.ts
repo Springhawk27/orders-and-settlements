@@ -31,8 +31,8 @@ describe('createOrderSchema', () => {
     expect(parsed.customer.email).toBe('ap@gulftrading.ae');
   });
 
-  it('defaults the currency to AED', () => {
-    expect(createOrderSchema.parse(validOrder).currency).toBe('AED');
+  it('defaults the currency rather than trusting the client to send one', () => {
+    expect(createOrderSchema.parse(validOrder).currency).toBe('USD');
   });
 
   it('treats the due date as UTC midnight', () => {

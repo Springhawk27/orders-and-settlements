@@ -19,7 +19,12 @@ const money = z
   .union([z.string(), z.number()])
   .transform((value) => (typeof value === 'number' ? String(value) : value.trim()))
   .refine((value) => MONEY_PATTERN.test(value), {
-    error: 'Use at most two decimal places, for example 1250.50',
+    // A blank field and a malformed one are different mistakes. Telling someone
+    // who typed nothing that they used too many decimal places is noise.
+    error: (issue) =>
+      String(issue.input ?? '').trim().length === 0
+        ? 'Enter an amount'
+        : 'Enter an amount like 1250.50, using at most two decimal places',
   })
   .transform(parseMoneyToMinor);
 
@@ -148,6 +153,16 @@ export const dateRangeQuerySchema = z.object({
   from: calendarDate.optional(),
   to: calendarDate.optional(),
 });
+
+/**
+ * What a client puts on the wire, before the schema parses it. The parsed types
+ * below are the server's view: dates become Date, amounts become integer minor
+ * units under different names. Sending a parsed value back to the API would not
+ * validate, so anything making a request uses these.
+ */
+export type CreateOrderRequest = z.input<typeof createOrderSchema>;
+export type UpdateOrderRequest = z.input<typeof updateOrderSchema>;
+export type RecordPaymentRequest = z.input<typeof recordPaymentSchema>;
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

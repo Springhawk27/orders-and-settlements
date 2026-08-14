@@ -1,4 +1,10 @@
-import { lineTotalMinor, parseMoneyToMinor, sumMinor } from '@crossval/shared';
+import {
+  DEFAULT_CURRENCY,
+  formatMinor,
+  lineTotalMinor,
+  parseMoneyToMinor,
+  sumMinor,
+} from '@crossval/shared';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
 import config from '../config';
@@ -220,7 +226,7 @@ const run = async (): Promise<void> => {
         nameLower: seed.customer.toLowerCase(),
         ...(seed.email && { email: seed.email }),
       },
-      currency: 'AED',
+      currency: DEFAULT_CURRENCY,
       issueDate,
       dueDate,
       lineItems,
@@ -258,10 +264,11 @@ const run = async (): Promise<void> => {
 
       await AuditEvent.create({
         userId,
-        entityType: 'payment',
-        entityId: payment._id,
+        entityType: 'order',
+        entityId: order._id,
         action: 'payment.recorded',
-        summary: `Payment recorded against ${order.orderNumber}`,
+        summary: `Payment of ${formatMinor(amountMinor)} recorded`,
+        metadata: { paymentId: payment._id.toString(), amountMinor },
         at: paidAt,
       });
     }

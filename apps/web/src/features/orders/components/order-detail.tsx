@@ -1,5 +1,6 @@
 'use client';
 
+import type { Currency } from '@crossval/shared';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Money } from '@/components/shared/money';
@@ -33,7 +34,7 @@ const SummaryFigure = ({
 }: {
   label: string;
   minorUnits: number;
-  currency: 'AED' | 'USD';
+  currency: Currency;
   emphasis?: boolean;
 }) => (
   <div className="space-y-1">

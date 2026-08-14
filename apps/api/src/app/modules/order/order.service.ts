@@ -88,6 +88,18 @@ const toDetail = (order: OrderDocument, now: Date = new Date()): OrderDto => ({
   })),
 });
 
+const matchesStoredLines = (order: OrderDocument, incoming: LineItemInput[]): boolean =>
+  order.lineItems.length === incoming.length &&
+  order.lineItems.every((stored, index) => {
+    const next = incoming[index];
+
+    return (
+      stored.description === next?.description &&
+      stored.quantity === next.quantity &&
+      stored.unitPriceMinor === next.unitPriceMinor
+    );
+  });
+
 const requireOwnedOrder = async (orderId: string, userId: string): Promise<OrderDocument> => {
   const order = await orderRepository.findOwned(orderId, toObjectId(userId));
 
@@ -181,29 +193,45 @@ const update = async (
 
   const changes: Record<string, unknown> = {};
 
-  if (input.customer?.name) {
+  // Only fields that differ from what is stored. A request repeats every field
+  // the form holds, so recording all of them would log a due-date change as
+  // though the customer had been renamed too.
+  const changed: string[] = [];
+
+  if (input.customer?.name && input.customer.name !== existing.customer.name) {
     changes['customer.name'] = input.customer.name;
     changes['customer.nameLower'] = input.customer.name.toLowerCase();
+    changed.push('customer name');
   }
 
-  if (input.customer?.email) {
+  if (input.customer?.email && input.customer.email !== existing.customer.email) {
     changes['customer.email'] = input.customer.email;
+    changed.push('customer email');
   }
 
-  if (input.dueDate) {
+  if (input.dueDate && input.dueDate.getTime() !== existing.dueDate.getTime()) {
     changes.dueDate = input.dueDate;
+    changed.push('due date');
   }
 
-  if (input.notes !== undefined) {
+  if (input.notes !== undefined && input.notes !== (existing.notes ?? '')) {
     changes.notes = input.notes;
+    changed.push('notes');
   }
 
-  if (input.lineItems) {
+  const lineItemsChanged = input.lineItems ? !matchesStoredLines(existing, input.lineItems) : false;
+
+  if (input.lineItems && lineItemsChanged) {
     const { lineItems, subtotalMinor } = buildLineItems(input.lineItems);
 
     changes.lineItems = lineItems;
     changes.subtotalMinor = subtotalMinor;
     changes.totalMinor = subtotalMinor;
+    changed.push('line items');
+  }
+
+  if (changed.length === 0) {
+    return toDetail(existing);
   }
 
   const updated = await Order.findOneAndUpdate(
@@ -220,9 +248,9 @@ const update = async (
     userId: ownerId,
     entityType: 'order',
     entityId: updated._id,
-    action: input.lineItems ? 'order.line_items_replaced' : 'order.updated',
-    summary: `Order ${updated.orderNumber} updated: ${Object.keys(changes).join(', ')}`,
-    metadata: { fields: Object.keys(changes) },
+    action: lineItemsChanged ? 'order.line_items_replaced' : 'order.updated',
+    summary: `Order updated: ${changed.join(', ')}`,
+    metadata: { fields: changed },
   });
 
   return toDetail(updated);

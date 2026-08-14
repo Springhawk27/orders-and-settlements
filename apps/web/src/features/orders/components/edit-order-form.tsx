@@ -4,6 +4,7 @@ import { formatMinor, minorToInputValue, updateOrderSchema, type Order } from '@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Money } from '@/components/shared/money';
@@ -20,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { handleFormApiError } from '@/lib/form-errors';
+import { reportInvalid } from '@/lib/report-invalid';
 import { useUpdateOrder } from '../hooks';
 
 type FormInput = z.input<typeof updateOrderSchema>;
@@ -35,32 +37,43 @@ export const EditOrderForm = ({ order }: { order: Order }) => {
   // server rejects changing them once money has moved.
   const lineItemsLocked = order.paymentCount > 0;
 
+  // Populated even when locked. `useFieldArray` cannot be called conditionally,
+  // and it would otherwise initialise this to an empty array that fails
+  // validation with no field on screen to show the error against.
+  const initialLineItems = useMemo(
+    () =>
+      order.lineItems.map((item) => ({
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: minorToInputValue(item.unitPriceMinor),
+      })),
+    [order.lineItems],
+  );
+
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(updateOrderSchema),
     defaultValues: {
       customer: { name: order.customer.name, email: order.customer.email ?? '' },
       dueDate: order.dueDate.slice(0, 10),
       notes: order.notes ?? '',
-      ...(lineItemsLocked
-        ? {}
-        : {
-            lineItems: order.lineItems.map((item) => ({
-              description: item.description,
-              quantity: item.quantity,
-              unitPrice: minorToInputValue(item.unitPriceMinor),
-            })),
-          }),
+      lineItems: initialLineItems,
     },
   });
 
   const { control, formState, handleSubmit, register, setError } = form;
   const { fields, append, remove } = useFieldArray({ control, name: 'lineItems' });
 
-  const onSubmit = async (values: FormOutput) => {
-    // Line items are only sent when they were actually touched, so a due-date
-    // change does not show up in the activity log as a line replacement.
-    const { lineItems, ...rest } = values;
-    const payload = formState.dirtyFields.lineItems ? values : rest;
+  // Raw field values rather than the resolver's parsed output, because the API
+  // parses the request itself and would reject a Date or a renamed amount.
+  //
+  // Line items are compared against what the order started with rather than
+  // asked of `formState.dirtyFields`: that is a proxy which only tracks fields
+  // read during render, so reading it here would always come back empty and
+  // silently drop the change.
+  const onSubmit = async () => {
+    const { lineItems, ...rest } = form.getValues();
+    const changed = JSON.stringify(lineItems) !== JSON.stringify(initialLineItems);
+    const payload = changed ? { ...rest, lineItems } : rest;
 
     try {
       await updateOrder.mutateAsync(payload);
@@ -71,7 +84,11 @@ export const EditOrderForm = ({ order }: { order: Order }) => {
   };
 
   return (
-    <form onSubmit={(event) => void handleSubmit(onSubmit)(event)} noValidate className="space-y-6">
+    <form
+      onSubmit={(event) => void handleSubmit(onSubmit, reportInvalid)(event)}
+      noValidate
+      className="space-y-6"
+    >
       <Card>
         <CardHeader>
           <CardTitle>Customer and terms</CardTitle>

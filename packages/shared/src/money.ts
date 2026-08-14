@@ -11,12 +11,9 @@ export class MoneyParseError extends Error {
 }
 
 /**
- * Convert a decimal amount into integer minor units (fils, cents).
- *
- * The digits are read off the string rather than multiplying by 100, because a
- * double cannot represent most decimal fractions: `19.99 * 100` is
- * 1998.9999999999998. Rounding that result hides the error instead of avoiding
- * it, and the error compounds once amounts are summed across a ledger.
+ * Convert a decimal amount into integer minor units. Digits are read off the
+ * string rather than multiplied by 100, because `19.99 * 100` is
+ * 1998.9999999999998 and rounding that hides the error rather than avoiding it.
  */
 export const parseMoneyToMinor = (input: string | number): number => {
   const raw = typeof input === 'number' ? String(input) : input.trim();
@@ -45,15 +42,12 @@ export const parseMoneyToMinor = (input: string | number): number => {
 
 /** Render minor units for display. Formatting happens here and nowhere else. */
 export const formatMinor = (minorUnits: number, currency: Currency = DEFAULT_CURRENCY): string =>
-  new Intl.NumberFormat('en-AE', {
+  new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(minorUnits / MINOR_UNITS_PER_MAJOR);
-
-/** Minor units as a decimal number. For charts and other numeric consumers only. */
-export const toMajor = (minorUnits: number): number => minorUnits / MINOR_UNITS_PER_MAJOR;
 
 /**
  * Minor units as a plain decimal string to put in a form field: no currency,

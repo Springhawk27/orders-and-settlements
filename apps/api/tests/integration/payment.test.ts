@@ -238,6 +238,27 @@ describe('voiding a payment', () => {
   });
 });
 
+describe('the order timeline', () => {
+  it('includes payments and voids, not just changes to the order itself', async () => {
+    const recorded = await pay('400');
+
+    await request(app)
+      .post(`/api/v1/payments/${recorded.body.data.payment.id}/void`)
+      .set('Cookie', owner.cookies)
+      .send({ reason: 'Entered in error' });
+
+    const response = await request(app)
+      .get(`${ORDERS}/${orderId}/audit`)
+      .set('Cookie', owner.cookies);
+
+    const actions = response.body.data.map((event: { action: string }) => event.action);
+
+    expect(actions).toContain('order.created');
+    expect(actions).toContain('payment.recorded');
+    expect(actions).toContain('payment.voided');
+  });
+});
+
 describe('what a payment locks on the order', () => {
   it('freezes the line items once money has been recorded', async () => {
     await pay('400');

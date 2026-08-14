@@ -52,12 +52,8 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => (
       </TableHeader>
       <TableBody>
         {orders.map((order) => (
-          /**
-           * The whole row opens the order. The link sits on the order number and
-           * stretches over the row with a pseudo-element, so there is still one
-           * real anchor: keyboard focus, middle-click and copy-link all behave
-           * normally, which a click handler on the row would break.
-           */
+          // The link stretches over the row with a pseudo-element rather than the
+          // row taking an onClick, so middle-click and copy-link still work.
           <TableRow key={order.id} className="group relative cursor-pointer">
             <TableCell className="font-medium">
               <Link

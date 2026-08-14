@@ -13,12 +13,7 @@ type AnimatedMoneyProps = {
 
 const DURATION_SECONDS = 0.7;
 
-/**
- * Counts up to the figure once it arrives, which makes a dashboard feel like it
- * is reporting rather than just rendering. The animation always finishes on the
- * exact value, and the real figure is rendered directly when the reader has
- * asked for less motion.
- */
+/** Counts up to the figure, always landing on the exact value. */
 export const AnimatedMoney = ({ minorUnits, currency, className }: AnimatedMoneyProps) => {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [animatedValue, setAnimatedValue] = useState(0);

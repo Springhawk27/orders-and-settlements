@@ -141,14 +141,16 @@ const record = async (
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Payment could not be recorded');
       }
 
+      // Recorded against the order, not the payment: the timeline a person
+      // reads is the order's history, and money arriving is part of it.
       await auditService.record(
         {
           userId: ownerId,
-          entityType: 'payment',
-          entityId: payment._id,
+          entityType: 'order',
+          entityId: orderObjectId,
           action: 'payment.recorded',
-          summary: `Payment of ${formatMinor(input.amountMinor, updatedOrder.currency)} recorded against ${updatedOrder.orderNumber}`,
-          metadata: { orderId, amountMinor: input.amountMinor },
+          summary: `Payment of ${formatMinor(input.amountMinor, updatedOrder.currency)} recorded`,
+          metadata: { paymentId: payment._id.toString(), amountMinor: input.amountMinor },
         },
         session,
       );
@@ -243,11 +245,15 @@ const voidPayment = async (
       await auditService.record(
         {
           userId: ownerId,
-          entityType: 'payment',
-          entityId: original._id,
+          entityType: 'order',
+          entityId: original.orderId,
           action: 'payment.voided',
           summary: `Payment of ${formatMinor(original.amountMinor, updatedOrder.currency)} voided: ${input.reason}`,
-          metadata: { reversalId: reversal._id.toString(), reason: input.reason },
+          metadata: {
+            paymentId: original._id.toString(),
+            reversalId: reversal._id.toString(),
+            reason: input.reason,
+          },
         },
         session,
       );

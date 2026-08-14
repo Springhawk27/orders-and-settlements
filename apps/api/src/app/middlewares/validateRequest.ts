@@ -2,12 +2,10 @@ import type { RequestHandler } from 'express';
 import type { ZodType } from 'zod';
 
 /**
- * Replaces the raw body with the parsed result, so handlers receive values that
- * are already coerced — dates as Date, money as integer minor units.
- *
- * A rejection here propagates to the error handler on its own: Express 5
- * forwards rejected promises from handlers, which is why there is no try/catch
- * wrapper anywhere in this codebase.
+ * Replaces the raw body with the parsed result, so handlers receive dates as
+ * Date and money as integer minor units. A rejection reaches the error handler
+ * on its own: Express 5 forwards them, which is why nothing here wraps a
+ * handler in try/catch.
  */
 const validateRequest =
   (schema: ZodType): RequestHandler =>
