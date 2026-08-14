@@ -35,8 +35,12 @@ app.use(
   }),
 );
 
-app.get('/health', (_req, res) => {
-  const connected = mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+// Opens the connection rather than only reporting on one someone else made, so
+// a cold instance answers with the truth instead of "disconnected".
+app.get('/health', async (_req, res) => {
+  const connected = await connectDatabase()
+    .then(() => mongoose.connection.readyState === mongoose.ConnectionStates.connected)
+    .catch(() => false);
 
   res.status(connected ? StatusCodes.OK : StatusCodes.SERVICE_UNAVAILABLE).json({
     status: connected ? 'ok' : 'degraded',

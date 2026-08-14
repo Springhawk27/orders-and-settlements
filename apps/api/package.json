@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsup",
-    "vercel-build": "tsup",
     "start": "node dist/server.js",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
