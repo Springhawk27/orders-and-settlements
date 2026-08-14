@@ -7,13 +7,13 @@ import helmet from 'helmet';
 import { StatusCodes } from 'http-status-codes';
 import mongoose from 'mongoose';
 import { pinoHttp } from 'pino-http';
-import swaggerUi from 'swagger-ui-express';
 import globalErrorHandler from './app/middlewares/globalErrorHandler.js';
 import notFound from './app/middlewares/notFound.js';
 import { apiRateLimiter } from './app/middlewares/rateLimiter.js';
 import routes from './app/routes/index.js';
 import config from './config/index.js';
 import { connectDatabase } from './config/database.js';
+import { DOCS_CDN_ORIGIN, docsInitScript, docsPage } from './docs/docs-page.js';
 import { openApiDocument } from './docs/openapi.js';
 import logger from './shared/logger.js';
 
@@ -61,17 +61,25 @@ app.get('/api/docs.json', (_req, res) => {
   res.json(openApiDocument);
 });
 
-// The UI reads files from swagger-ui-dist, which a bundler may not trace in.
-// Losing the docs page should not stop the API serving requests.
-try {
-  app.use(
-    '/api/docs',
-    swaggerUi.serve,
-    swaggerUi.setup(openApiDocument, { customSiteTitle: 'Orders and Settlements API' }),
-  );
-} catch (error) {
-  logger.warn({ err: error }, 'swagger ui unavailable, serving the raw spec at /api/docs.json');
-}
+// Swagger's assets are loaded from a CDN because the deployment only traces
+// static imports, and the packaged copy is resolved by runtime path lookup.
+const docsCsp = helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", DOCS_CDN_ORIGIN],
+    styleSrc: ["'self'", "'unsafe-inline'", DOCS_CDN_ORIGIN],
+    imgSrc: ["'self'", 'data:'],
+    connectSrc: ["'self'"],
+  },
+});
+
+app.get('/api/docs', docsCsp, (_req, res) => {
+  res.type('html').send(docsPage);
+});
+
+app.get('/api/docs/init.js', (_req, res) => {
+  res.type('js').send(docsInitScript);
+});
 
 app.use(apiRateLimiter);
 app.use(`/api/${API_VERSION}`, routes);
